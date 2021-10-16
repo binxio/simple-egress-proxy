@@ -1,10 +1,11 @@
 simple egress proxy
 ==================
 In projects protected by a VPC service control perimeter, new push subscriptions cannot be created unless the push 
-endpoints are set to Cloud Run services with default run.app URLs (custom domains won't work). 
+endpoints are set to Cloud Run services with default run.app URLs (custom domains won't work). If you try
+to create a push subscription, the client get the error: `Request is prohibited by organization's policy.`
 
 This simple proxy can be used to work around that problem. You deploy this image as Cloud Run service and subscribe the
-cloud run service to the topic. This egress will proxy to the real target.
+cloud run service to the topic. This egress proxy will forward the event to the real destination.
 
 ```hcl
 resource "google_cloud_run_service" "push_subscription_proxy" {
@@ -15,29 +16,14 @@ resource "google_cloud_run_service" "push_subscription_proxy" {
     spec {
       service_account_name = google_service_account.push_subscription_proxy.email
       containers {
-        image = "gcr.io/binx-io-public/simple-egress-proxy:latest"
-        args = [ "--target-url", "https://httpbin.org/anything"]
+        image = "gcr.io/binx-io-public/simple-egress-proxy:0.1.0"
+        args = [ "--target-url", "https://httpbin.org/anything/event"]
       }
     }
   }
 }
 
-resource "google_service_account" "push_subscription_proxy" {
-  account_id   = "push-subscription-proxy"
-  display_name = "Pub/Sub push subscription proxy"
-}
-
-resource "google_cloud_run_service_iam_binding" "push_subscription_proxy_run_invokers" {
-  location = google_cloud_run_service.push_subscription_proxy.location
-  project  = google_cloud_run_service.push_subscription_proxy.project
-  service  = google_cloud_run_service.push_subscription_proxy.name
-  role     = "roles/run.invoker"
-  members = [
-    format("serviceAccount:%s", google_service_account.push_subscription_proxy.email)
-  ]
-}
-
-```
+Now you can create a Google Pub/Sub subscription:
 
 ```hcl
 resource "google_pubsub_topic" "notifications" {
