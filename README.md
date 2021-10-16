@@ -22,6 +22,7 @@ resource "google_cloud_run_service" "push_subscription_proxy" {
     }
   }
 }
+```
 
 Now you can create a Google Pub/Sub subscription:
 
@@ -42,3 +43,5 @@ resource "google_pubsub_subscription" "proxied_push_subscription" {
   }
 }
 ```
+
+See also [How to configure a Google Pub/Sub push subscription within a VPC Service control perimeter](https://binx.io/blog/2021/10/16/how-to-configure…ontrol-perimeter)
