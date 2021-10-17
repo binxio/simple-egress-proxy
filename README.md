@@ -44,4 +44,4 @@ resource "google_pubsub_subscription" "proxied_push_subscription" {
 }
 ```
 
-See also [How to configure a Google Pub/Sub push subscription within a VPC Service control perimeter](https://binx.io/blog/2021/10/17/how-to-configure…ontrol-perimeter)
+See also [How to configure a Google Pub/Sub push subscription within a VPC Service control perimeter](https://binx.io/blog/2021/10/17/how-to-configure-a-google-pub-sub-push-subscription-within-a-vpc-service-control-perimeter/)
