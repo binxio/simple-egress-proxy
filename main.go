@@ -15,6 +15,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"log"
 	"net/http"
@@ -36,9 +37,11 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	var insecure bool
 	var targetURL string
 	var listenPort string
 
+	flag.BoolVar(&insecure, "insecure", true, "allow expired and unknown host certificates")
 	flag.StringVar(&targetURL, "target-url", "", "to forward HTTP requests to")
 	flag.Parse()
 	if targetURL == "" {
@@ -63,6 +66,13 @@ func main() {
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
+
+	if insecure {
+		proxy.Transport =
+			&http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
+			}
+	}
 	http.Handle("/", &ProxyHandler{proxy: proxy, target: target})
 	err = http.ListenAndServe(":"+listenPort, nil)
 	if err != nil {
